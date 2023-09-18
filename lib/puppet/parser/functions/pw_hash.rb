@@ -73,17 +73,18 @@ DOC
   return nil if password.nil? || password.empty?
 
   salt = "$#{hash_type[:prefix]}$#{args[2]}"
+  org.apache.commons.codec.digest.Crypt.crypt(password.to_java_bytes, salt)
 
-  # handle weak implementations of String#crypt
-  # dup the string to get rid of frozen status for testing
-  if RUBY_PLATFORM == 'java'
-    # puppetserver bundles Apache Commons Codec
-    org.apache.commons.codec.digest.Crypt.crypt(password.to_java_bytes, salt)
-  elsif (+'test').crypt('$1$1') == '$1$1$Bp8CU9Oujr9SSEw53WV6G.'
-    password.crypt(salt)
-  else
-    # JRuby < 1.7.17
-    # MS Windows and other systems that don't support enhanced salts
-    raise Puppet::ParseError, 'system does not support enhanced salts'
-  end
+  # # handle weak implementations of String#crypt
+  # # dup the string to get rid of frozen status for testing
+  # if RUBY_PLATFORM == 'java'
+  #   # puppetserver bundles Apache Commons Codec
+  #   org.apache.commons.codec.digest.Crypt.crypt(password.to_java_bytes, salt)
+  # elsif (+'test').crypt('$1$1') == '$1$1$Bp8CU9Oujr9SSEw53WV6G.'
+  #   password.crypt(salt)
+  # else
+  #   # JRuby < 1.7.17
+  #   # MS Windows and other systems that don't support enhanced salts
+  #   raise Puppet::ParseError, 'system does not support enhanced salts'
+  # end
 end
